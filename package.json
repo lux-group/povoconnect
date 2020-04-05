@@ -1,0 +1,28 @@
+{
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "test": "APP_ENV=spec mocha --exit -r ts-node/register \"./{src,test}/**/*.spec.ts\" && yarn run lint && yarn run build",
+    "lint": "eslint src test --ext .ts",
+    "lint-fix": "yarn run lint --fix"
+  },
+  "dependencies": {
+    "@types/jsforce": "^1.9.15",
+    "jsforce": "^1.9.3"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.0",
+    "@types/micro": "^7.3.3",
+    "@types/mocha": "^5.2.7",
+    "@types/node-fetch": "^2.5.0",
+    "@typescript-eslint/eslint-plugin": "^2.1.0",
+    "@typescript-eslint/parser": "^2.1.0",
+    "chai": "^4.2.0",
+    "eslint": "^6.3.0",
+    "eslint-config-prettier": "^6.2.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "mocha": "^6.2.0",
+    "prettier": "^1.18.2",
+    "ts-node": "^8.3.0",
+    "typescript": "^3.5.3"
+  }
+}
