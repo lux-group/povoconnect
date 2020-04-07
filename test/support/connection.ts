@@ -21,7 +21,7 @@ function loop(
 
   const loop = (): void => {
     to = setTimeout(loop, 1000);
-    listener(build<StreamingMessage>("message"));
+    listener(build<StreamingMessage>("Message"));
   };
 
   loop();
@@ -81,8 +81,8 @@ class MockStreaming extends EventEmitter {
     return this;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  createClient(): any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+  createClient(extensions?: Array<any>): any {
     return {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       subscribe: (channel: string, listener: (data: any) => void): any => {
@@ -101,6 +101,11 @@ class MockConnection extends Connection {
   }
 
   streaming: MockStreaming;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  retrieve<T>(ids: string | string[]): T {
+    return build<T>("OpportunitySObject");
+  }
 }
 
 export async function connect(

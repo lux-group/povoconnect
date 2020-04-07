@@ -13,20 +13,18 @@ export interface Message {
 
 export interface Subscription {
   topic: string;
-  replayId: () => Promise<number | null>;
-  insert: (message: Message) => Promise<void>;
+  replayId: number | null;
 }
 
 const allRetainedEvents = -2;
 
 export async function subscribe(
   conn: Connection,
-  subscription: Subscription,
-  timeout: number
+  { topic, replayId }: Subscription,
+  timeout: number,
+  onReceive: (message: Message) => Promise<void>
 ): Promise<void> {
-  const replayId = await subscription.replayId();
-
-  const channel = `/topic/${subscription.topic}`;
+  const channel = `/topic/${topic}`;
 
   const exitCallback = (): void => process.exit(1);
   const authFailureExt = new StreamingExtension.AuthFailure(exitCallback);
@@ -40,7 +38,7 @@ export async function subscribe(
 
   const listner = client.subscribe(channel, (data: unknown) => {
     const message: Message = data as Message;
-    subscription.insert(message);
+    onReceive(message);
   });
 
   return new Promise(resove => {

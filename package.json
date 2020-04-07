@@ -2,7 +2,8 @@
   "scripts": {
     "build": "rm -rf dist && tsc",
     "test": "APP_ENV=spec mocha --exit -r ts-node/register \"./{src,test}/**/*.spec.ts\" && yarn run lint && yarn run build",
-    "lint": "eslint src test --ext .ts",
+		"smoke": "ts-node smoke.ts",
+    "lint": "eslint src test smoke.ts --ext .ts",
     "lint-fix": "yarn run lint --fix"
   },
   "dependencies": {

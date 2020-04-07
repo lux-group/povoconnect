@@ -306,8 +306,7 @@ CREATE TABLE salesforce.opportunity (
   id integer NOT NULL,
   name character varying(255) NOT NULL,
   systemmodstamp timestamp WITHOUT time zone,
-  _hc_lastop character varying(32),
-  _hc_err text
+  createddate timestamp WITHOUT time zone
 );
 
 CREATE SEQUENCE salesforce.opportunity_id_seq

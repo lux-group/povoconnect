@@ -62,6 +62,7 @@
   },
   "exclude": [
     "**/*.spec.ts",
+    "smoke.ts",
     "test"
   ]
 }
