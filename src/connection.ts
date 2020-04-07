@@ -1,6 +1,6 @@
-import { Connection, UserInfo } from "jsforce";
+import { Connection } from "jsforce";
 
-interface Credentials {
+export interface Credentials {
   clientId: string;
   clientSecret: string;
   loginUrl: string;
@@ -8,15 +8,8 @@ interface Credentials {
   username: string;
 }
 
-interface ConnectionSuccess {
-  conn: Connection;
-  userInfo: UserInfo;
-}
-
-export function getConnection(
-  credentials: Credentials
-): Promise<ConnectionSuccess> {
-  return new Promise(function(resolve, reject) {
+export function connect(credentials: Credentials): Promise<Connection> {
+  return new Promise((resolve, reject) => {
     const conn = new Connection({
       oauth2: {
         loginUrl: credentials.loginUrl,
@@ -25,14 +18,11 @@ export function getConnection(
       }
     });
 
-    conn.login(credentials.username, credentials.password, function(
-      err,
-      userInfo
-    ) {
+    conn.login(credentials.username, credentials.password, function(err) {
       if (err) {
         reject(err);
       } else {
-        resolve({ conn, userInfo });
+        resolve(conn);
       }
     });
   });

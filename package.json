@@ -10,6 +10,7 @@
     "jsforce": "^1.9.3"
   },
   "devDependencies": {
+    "@luxuryescapes/lib-factories": "^1.0.3",
     "@types/chai": "^4.2.0",
     "@types/micro": "^7.3.3",
     "@types/mocha": "^5.2.7",
@@ -24,5 +25,8 @@
     "prettier": "^1.18.2",
     "ts-node": "^8.3.0",
     "typescript": "^3.5.3"
+  },
+  "engines": {
+    "node": ">= 10"
   }
 }
