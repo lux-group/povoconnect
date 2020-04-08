@@ -28,8 +28,8 @@ describe("Integration Tests", function() {
     await processSFEventLogs<OpportunitySObject, OpportunityModel>(
       conn,
       "Opportunity",
-      OpportunityMapper,
       messages,
+      OpportunityMapper,
       onReceive
     );
 

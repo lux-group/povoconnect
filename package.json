@@ -2,12 +2,13 @@
   "scripts": {
     "build": "rm -rf dist && tsc",
     "test": "APP_ENV=spec mocha --exit -r ts-node/register \"./{src,test}/**/*.spec.ts\" && yarn run lint && yarn run build",
-		"smoke": "ts-node smoke.ts",
+    "smoke": "ts-node smoke.ts",
     "lint": "eslint src test smoke.ts --ext .ts",
     "lint-fix": "yarn run lint --fix"
   },
   "dependencies": {
     "@types/jsforce": "^1.9.15",
+    "@types/readable-stream": "^2.3.5",
     "jsforce": "^1.9.3"
   },
   "devDependencies": {
