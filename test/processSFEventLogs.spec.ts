@@ -19,10 +19,20 @@ describe("Integration Tests", function() {
 
     const conn = await connect(credentials);
 
-    const messages = [build<Message>("Message")];
+    const messages = [
+      build<Message>("Message", { event: { type: "updated" } })
+    ];
 
-    const onReceive = async (opportunity: OpportunityModel): Promise<void> => {
+    const onCreate = async (): Promise<void> => {
+      return;
+    };
+
+    const onUpdate = async (opportunity: OpportunityModel): Promise<void> => {
       model = opportunity;
+    };
+
+    const onDelete = async (): Promise<void> => {
+      return;
     };
 
     await processSFEventLogs<OpportunitySObject, OpportunityModel>(
@@ -30,7 +40,9 @@ describe("Integration Tests", function() {
       "Opportunity",
       messages,
       OpportunityMapper,
-      onReceive
+      onCreate,
+      onUpdate,
+      onDelete
     );
 
     if (!model) {

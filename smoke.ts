@@ -45,6 +45,8 @@ async function povo(): Promise<void> {
     messages,
     OpportunityMapper,
     onReceiveModel,
+    onReceiveModel,
+    onReceiveModel,
     OpportunityFields
   );
 

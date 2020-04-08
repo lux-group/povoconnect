@@ -1,12 +1,6 @@
 import { Connection } from "jsforce";
 
-export interface Credentials {
-  clientId: string;
-  clientSecret: string;
-  loginUrl: string;
-  password: string;
-  username: string;
-}
+import { Credentials } from "./types";
 
 export function connect(credentials: Credentials): Promise<Connection> {
   return new Promise((resolve, reject) => {

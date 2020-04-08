@@ -1,11 +1,13 @@
 import { PassThrough } from "readable-stream";
 import { Connection } from "jsforce";
 
+import { IdReceiveCallback } from "./types";
+
 export async function list(
   conn: Connection,
   sobjectName: string,
   timeout: number,
-  onReceive: (id: string) => Promise<void>
+  onReceive: IdReceiveCallback
 ): Promise<void> {
   let csvString = "";
 

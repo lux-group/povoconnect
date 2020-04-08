@@ -1,20 +1,6 @@
 import { Connection, StreamingExtension } from "jsforce";
 
-export interface Message {
-  event: {
-    createdDate: string;
-    replayId: number;
-    type: "updated" | "created" | "deleted" | "undeleted";
-  };
-  sobject: {
-    Id: string;
-  };
-}
-
-export interface Subscription {
-  topic: string;
-  replayId: number | null;
-}
+import { Subscription, Message, MessageReceiveCallback } from "./types";
 
 const allRetainedEvents = -2;
 
@@ -22,7 +8,7 @@ export async function subscribe(
   conn: Connection,
   { topic, replayId }: Subscription,
   timeout: number,
-  onReceive: (message: Message) => Promise<void>
+  onReceive: MessageReceiveCallback
 ): Promise<void> {
   const channel = `/topic/${topic}`;
 

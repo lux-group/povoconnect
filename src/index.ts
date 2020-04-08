@@ -1,30 +1,57 @@
 import { Connection } from "jsforce";
 
-import { connect, Credentials } from "./connection";
+import { connect } from "./connection";
 import { retrieve as processSync } from "./retrieve";
 import { list as queueupSync } from "./list";
+import { subscribe as queueupSFEventLogs } from "./streaming";
+
 import {
-  subscribe as queueupSFEventLogs,
-  Subscription,
-  Message
-} from "./streaming";
+  ModelMappedCallback,
+  MessageReceiveCallback,
+  IdReceiveCallback,
+  Credentials,
+  Message,
+  Subscription
+} from "./types";
 
 export {
-  connect,
+  ModelMappedCallback,
+  MessageReceiveCallback,
+  IdReceiveCallback,
   Credentials,
-  Subscription,
   Message,
-  queueupSync,
+  Subscription,
+  connect,
   processSync,
+  queueupSync,
   queueupSFEventLogs
 };
+
+function callback<M>(
+  eventType: string,
+  onCreate: ModelMappedCallback<M>,
+  onUpdate: ModelMappedCallback<M>,
+  onDelete: ModelMappedCallback<M>
+): ModelMappedCallback<M> {
+  if (eventType === "updated") {
+    return onUpdate;
+  }
+
+  if (eventType === "deleted") {
+    return onDelete;
+  }
+
+  return onCreate;
+}
 
 export async function processSFEventLogs<O, M>(
   conn: Connection,
   sobjectName: string,
   messages: Message[],
   mapper: (o: O) => M,
-  onReceive: (model: M) => Promise<void>,
+  onCreate: ModelMappedCallback<M>,
+  onUpdate: ModelMappedCallback<M>,
+  onDelete: ModelMappedCallback<M>,
   fields?: string[]
 ): Promise<void> {
   for (const message of messages) {
@@ -33,7 +60,7 @@ export async function processSFEventLogs<O, M>(
       sobjectName,
       message.sobject.Id,
       mapper,
-      onReceive,
+      callback<M>(message.event.type, onCreate, onUpdate, onDelete),
       fields
     );
   }
