@@ -1,6 +1,7 @@
 import { PassThrough } from "readable-stream";
 import { Connection } from "jsforce";
 
+import { ListTimeOutError } from "./errors";
 import { IdReceiveCallback } from "./types";
 
 export async function list(
@@ -15,6 +16,12 @@ export async function list(
 
   conn.bulk.pollTimeout = timeout;
 
+  const onTimeout = (): void => {
+    throw new ListTimeOutError(timeout);
+  };
+
+  const to = setTimeout(onTimeout, timeout);
+
   return new Promise((resolve, reject) => {
     conn.bulk
       .query(`SELECT Id FROM ${sobjectName}`)
@@ -24,6 +31,7 @@ export async function list(
         csvString = csvString.concat(partialCsvString.toString());
       })
       .on("end", () => {
+        clearTimeout(to);
         // Process the CSV string into an array of IDs.
         // Step 1: Remove all the quotes around the values.
         // Notes: The call to replace is using a regex looking for the

@@ -1,4 +1,7 @@
 {
+  "version": "0.0.1",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "build": "rm -rf dist && tsc",
     "test": "APP_ENV=spec mocha --exit -r ts-node/register \"./{src,test}/**/*.spec.ts\" && yarn run lint && yarn run build",

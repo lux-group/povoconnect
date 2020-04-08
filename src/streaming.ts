@@ -32,6 +32,8 @@ export async function subscribe(
       listner.cancel();
       resove();
     };
-    setTimeout(onTimeout, timeout);
+    if (timeout !== Infinity) {
+      setTimeout(onTimeout, timeout);
+    }
   });
 }
