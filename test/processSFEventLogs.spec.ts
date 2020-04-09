@@ -11,15 +11,13 @@ import { OpportunitySObject, OpportunityModel } from "./support/types";
 import { OpportunityMapper } from "./support/mapping";
 import { connect } from "./support/connection";
 
-describe("Integration Tests", function() {
-  this.timeout(10000);
-
-  it("inserts sf event logs", async () => {
+describe("processSFEventLogs", function() {
+  it("retrieves a model from a message", async () => {
     let model: OpportunityModel | undefined;
 
     const conn = await connect(credentials);
 
-    const messages = [
+    const messages: Message[] = [
       build<Message>("Message", { event: { type: "updated" } })
     ];
 
@@ -35,6 +33,10 @@ describe("Integration Tests", function() {
       return;
     };
 
+    const onUnDelete = async (): Promise<void> => {
+      return;
+    };
+
     await processSFEventLogs<OpportunitySObject, OpportunityModel>(
       conn,
       "Opportunity",
@@ -42,7 +44,8 @@ describe("Integration Tests", function() {
       OpportunityMapper,
       onCreate,
       onUpdate,
-      onDelete
+      onDelete,
+      onUnDelete
     );
 
     if (!model) {

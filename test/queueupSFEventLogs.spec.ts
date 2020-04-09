@@ -3,30 +3,28 @@
 import "mocha";
 import { assert } from "chai";
 
-import { queueupSFEventLogs } from "../src";
+import { queueupSFEventLogs, Message } from "../src";
 
 import * as credentials from "./support/credentials";
 import { connect } from "./support/connection";
 
-describe("Integration Tests", function() {
-  this.timeout(10000);
-
-  it("inserts sf event logs", async () => {
-    let inserted = false;
+describe("queueupSFEventLogs", function() {
+  it("subscribes to topic and recieves a message", async () => {
+    let message: Message | undefined;
 
     const subscription = {
       topic: "OpportunityUpdates",
       replayId: 1
     };
 
-    const onReceive = async (): Promise<void> => {
-      inserted = true;
+    const onReceive = async (m: Message): Promise<void> => {
+      message = m;
     };
 
     const conn = await connect(credentials);
 
-    await queueupSFEventLogs(conn, subscription, 1000, onReceive);
+    await queueupSFEventLogs(conn, subscription, 1, onReceive);
 
-    assert(inserted);
+    assert(message);
   });
 });

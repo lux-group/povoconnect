@@ -27,23 +27,6 @@ export {
   queueupSFEventLogs
 };
 
-function callback<M>(
-  eventType: string,
-  onCreate: ModelMappedCallback<M>,
-  onUpdate: ModelMappedCallback<M>,
-  onDelete: ModelMappedCallback<M>
-): ModelMappedCallback<M> {
-  if (eventType === "updated") {
-    return onUpdate;
-  }
-
-  if (eventType === "deleted") {
-    return onDelete;
-  }
-
-  return onCreate;
-}
-
 export async function processSFEventLogs<O, M>(
   conn: Connection,
   sobjectName: string,
@@ -51,16 +34,29 @@ export async function processSFEventLogs<O, M>(
   mapper: (o: O) => M,
   onCreate: ModelMappedCallback<M>,
   onUpdate: ModelMappedCallback<M>,
-  onDelete: ModelMappedCallback<M>,
+  onDelete: IdReceiveCallback,
+  onUnDelete: IdReceiveCallback,
   fields?: string[]
 ): Promise<void> {
   for (const message of messages) {
+    if (message.event.type === "deleted") {
+      await onDelete(message.sobject.Id);
+      continue;
+    }
+
+    if (message.event.type === "undeleted") {
+      await onUnDelete(message.sobject.Id);
+      continue;
+    }
+
+    const callback = message.event.type === "updated" ? onUpdate : onCreate;
+
     await processSync<O, M>(
       conn,
       sobjectName,
       message.sobject.Id,
       mapper,
-      callback<M>(message.event.type, onCreate, onUpdate, onDelete),
+      callback,
       fields
     );
   }

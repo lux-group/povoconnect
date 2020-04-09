@@ -46,7 +46,8 @@ async function povo(): Promise<void> {
     OpportunityMapper,
     onReceiveModel,
     onReceiveModel,
-    onReceiveModel,
+    async (): Promise<void> => { return },
+    async (): Promise<void> => { return },
     OpportunityFields
   );
 
