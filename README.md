@@ -149,6 +149,19 @@ async function povo() {
 povo();
 ```
 
+You can also specify a query object:
+
+```js
+const query = {
+  fields: ["Id", "CreatedDate"],
+  where: "foo = 'bar'",
+  limit: 100
+}
+
+await queueupSync(conn, "Opportunity", timeout, onReceive, query);
+```
+
+
 ## Sync Object
 
 Retrieves the object to sync.
