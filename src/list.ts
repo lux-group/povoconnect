@@ -1,19 +1,56 @@
-import { PassThrough } from "readable-stream";
 import { Connection } from "jsforce";
+import csv from "csv-parser";
 
+import { createSOQL } from "./soql";
 import { ListTimeOutError } from "./errors";
-import { IdReceiveCallback } from "./types";
+import { Query, ModelMappedCallback } from "./types";
 
-export async function list(
+function getFields(query?: Query): string[] {
+  const idOnly = ["Id"];
+
+  if (!query) {
+    return idOnly;
+  }
+
+  if (!query.fields) {
+    return idOnly;
+  }
+
+  return query.fields;
+}
+
+function getWhere(query?: Query): string | null {
+  if (!query) {
+    return null;
+  }
+
+  if (!query.where) {
+    return null;
+  }
+
+  return query.where;
+}
+
+function getLimit(query?: Query): number | null {
+  if (!query) {
+    return null;
+  }
+
+  if (!query.limit) {
+    return null;
+  }
+
+  return query.limit;
+}
+
+export async function list<O, M>(
   conn: Connection,
   sobjectName: string,
   timeout: number,
-  onReceive: IdReceiveCallback
+  mapper: (sobject: O) => M,
+  onReceive: ModelMappedCallback<M>,
+  query?: Query
 ): Promise<void> {
-  let csvString = "";
-
-  const onReceivePromiseList: Promise<void>[] = [];
-
   conn.bulk.pollTimeout = timeout;
 
   const onTimeout = (): void => {
@@ -22,35 +59,32 @@ export async function list(
 
   const to = setTimeout(onTimeout, timeout);
 
+  const fields = getFields(query);
+
+  const where = getWhere(query);
+
+  const limit = getLimit(query);
+
+  const soql = createSOQL(sobjectName, fields, where, limit);
+
+  const sobjects: O[] = [];
+
   return new Promise((resolve, reject) => {
     conn.bulk
-      .query(`SELECT Id FROM ${sobjectName}`)
+      .query(soql)
       .stream()
-      .pipe(new PassThrough())
-      .on("data", (partialCsvString: Buffer) => {
-        csvString = csvString.concat(partialCsvString.toString());
+      .pipe(csv())
+      .on("data", (sobject: O) => {
+        sobjects.push(sobject);
       })
-      .on("end", () => {
+      .on("end", async () => {
         clearTimeout(to);
-        // Process the CSV string into an array of IDs.
-        // Step 1: Remove all the quotes around the values.
-        // Notes: The call to replace is using a regex looking for the
-        // double-quote (") character to replace it with an empty string. The g
-        // at the end is for global which allows it to replace all occurances.
-        // Otherwise it only replaces the first one.
-        // Step 2: Split the string on the newline character to get an array
-        // with a value for each line.
-        const ids = csvString.replace(/"/g, "").split("\n");
-        // Step 3: Remove the first element (CSV header row that says "Id")
-        ids.shift();
-        // Step 4: Remove the last element, which is an empty string because the
-        // last character the stream sends is the newline character that we
-        // split on.
-        ids.pop();
 
-        ids.forEach(id => onReceivePromiseList.push(onReceive(id)));
+        for (const sobject of sobjects) {
+          await onReceive(mapper(sobject));
+        }
 
-        Promise.all(onReceivePromiseList).then(() => resolve());
+        resolve();
       })
       .on("error", reject);
   });

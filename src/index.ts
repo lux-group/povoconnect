@@ -4,6 +4,7 @@ import { connect } from "./connection";
 import { retrieve as processSync } from "./retrieve";
 import { list as queueupSync } from "./list";
 import { subscribe as queueupSFEventLogs } from "./streaming";
+import { createSOQL } from "./soql";
 
 import {
   ModelMappedCallback,
@@ -24,7 +25,8 @@ export {
   connect,
   processSync,
   queueupSync,
-  queueupSFEventLogs
+  queueupSFEventLogs,
+  createSOQL
 };
 
 export async function processSFEventLogs<O, M>(

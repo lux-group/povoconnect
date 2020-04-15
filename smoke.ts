@@ -11,9 +11,9 @@ import { OpportunityMapper, OpportunityFields } from "./test/support/mapping";
 
 const messages: Message[] = [];
 
-const models: OpportunityModel[] = [];
+const eventModels: OpportunityModel[] = [];
 
-const ids: string[] = [];
+const listModels: OpportunityModel[] = [];
 
 const subscription = {
   topic: "OpportunityUpdates",
@@ -24,12 +24,16 @@ async function onReceiveMessage(message: Message): Promise<void> {
   messages.push(message);
 }
 
-async function onReceiveModel(opportunity: OpportunityModel): Promise<void> {
-  models.push(opportunity);
+async function onReceiveEventModel(
+  opportunity: OpportunityModel
+): Promise<void> {
+  eventModels.push(opportunity);
 }
 
-async function onReceiveId(sfid: string): Promise<void> {
-  ids.push(sfid);
+async function onReceiveListModel(
+  opportunity: OpportunityModel
+): Promise<void> {
+  listModels.push(opportunity);
 }
 
 async function povo(): Promise<void> {
@@ -44,18 +48,35 @@ async function povo(): Promise<void> {
     "Opportunity",
     messages,
     OpportunityMapper,
-    onReceiveModel,
-    onReceiveModel,
-    async (): Promise<void> => { return },
-    async (): Promise<void> => { return },
+    onReceiveEventModel,
+    onReceiveEventModel,
+    async (): Promise<void> => {
+      return;
+    },
+    async (): Promise<void> => {
+      return;
+    },
     OpportunityFields
   );
 
-  console.log("Models count:", models.length);
+  console.log("Event model count:", eventModels.length);
 
-  await queueupSync(conn, "Opportunity", 60000, onReceiveId);
+  const query = {
+    where: "iswon = true",
+    limit: 100,
+    fields: OpportunityFields
+  };
 
-  console.log("ID count:", ids.length);
+  await queueupSync<OpportunitySObject, OpportunityModel>(
+    conn,
+    "Opportunity",
+    60000,
+    OpportunityMapper,
+    onReceiveListModel,
+    query
+  );
+
+  console.log("List model count:", listModels.length);
 }
 
 const main = async function(): Promise<void> {

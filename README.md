@@ -124,12 +124,11 @@ async function povo() {
 
 Note: `fields` argument is optional, if ommited entire object will be retrieved.
 
-## Retrieving All Object IDs
+## Retrieving All
 
-If you need to resync all your data because you want to sync a new field from
-Salesforce.
+If you need to resync all your data.
 
-list` return all ids for you object so you can create jobs to sync the data.
+`list` returns all ids for you object so you can create jobs to sync the data.
 
 ```js
 import { queueupSync } from "@luxuryescapes/povoconnect";
@@ -137,7 +136,7 @@ import { credentials } from "./config";
 
 const timeout = 60000;
 
-async function onReceive(id) {
+async function onReceive({ Id }) {
   // do something here
 }
 

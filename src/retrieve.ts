@@ -1,5 +1,5 @@
 import { Connection } from "jsforce";
-import { ModelMappedCallback } from "./types";
+import { ModelMappedCallback, Fields } from "./types";
 
 export async function retrieve<O, M>(
   conn: Connection,
@@ -7,7 +7,7 @@ export async function retrieve<O, M>(
   sobjectId: string,
   mapper: (sobject: O) => M,
   onReceive: ModelMappedCallback<M>,
-  fields?: string[]
+  fields?: Fields
 ): Promise<void> {
   const sobject = await conn
     .sobject<O>(sobjectName)
