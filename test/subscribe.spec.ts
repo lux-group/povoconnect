@@ -3,7 +3,7 @@
 import "mocha";
 import { assert } from "chai";
 
-import { queueupSFEventLogs, Message } from "../src";
+import { subscribe, Message } from "../src";
 
 import * as credentials from "./support/credentials";
 import { connect } from "./support/connection";
@@ -23,7 +23,7 @@ describe("queueupSFEventLogs", function() {
 
     const conn = await connect(credentials);
 
-    await queueupSFEventLogs(conn, subscription, 1, onReceive);
+    await subscribe(conn, subscription, 1, onReceive);
 
     assert(message);
   });

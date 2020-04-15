@@ -1,7 +1,7 @@
 import {
-  queueupSFEventLogs,
+  subscribe,
   processSFEventLogs,
-  queueupSync,
+  findAll,
   Message,
   connect
 } from "./src";
@@ -13,7 +13,7 @@ const messages: Message[] = [];
 
 const eventModels: OpportunityModel[] = [];
 
-const listModels: OpportunityModel[] = [];
+const findModels: OpportunityModel[] = [];
 
 const subscription = {
   topic: "OpportunityUpdates",
@@ -33,13 +33,13 @@ async function onReceiveEventModel(
 async function onReceiveListModel(
   opportunity: OpportunityModel
 ): Promise<void> {
-  listModels.push(opportunity);
+  findModels.push(opportunity);
 }
 
 async function povo(): Promise<void> {
   const conn = await connect(credentials);
 
-  await queueupSFEventLogs(conn, subscription, 10000, onReceiveMessage);
+  await subscribe(conn, subscription, 10000, onReceiveMessage);
 
   console.log("Message count:", messages.length);
 
@@ -67,7 +67,7 @@ async function povo(): Promise<void> {
     fields: OpportunityFields
   };
 
-  await queueupSync<OpportunitySObject, OpportunityModel>(
+  await findAll<OpportunitySObject, OpportunityModel>(
     conn,
     "Opportunity",
     60000,
@@ -76,7 +76,7 @@ async function povo(): Promise<void> {
     query
   );
 
-  console.log("List model count:", listModels.length);
+  console.log("List model count:", findModels.length);
 }
 
 const main = async function(): Promise<void> {

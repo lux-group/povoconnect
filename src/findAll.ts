@@ -43,7 +43,7 @@ function getLimit(query?: Query): number | null {
   return query.limit;
 }
 
-export async function list<O, M>(
+export async function find<O, M>(
   conn: Connection,
   sobjectName: string,
   timeout: number,

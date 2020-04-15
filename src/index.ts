@@ -1,9 +1,9 @@
 import { Connection } from "jsforce";
 
 import { connect } from "./connection";
-import { retrieve as processSync } from "./retrieve";
-import { list as queueupSync } from "./list";
-import { subscribe as queueupSFEventLogs } from "./streaming";
+import { find as findOne } from "./findOne";
+import { find as findAll } from "./findAll";
+import { subscribe } from "./streaming";
 import { createSOQL } from "./soql";
 
 import {
@@ -23,9 +23,9 @@ export {
   Message,
   Subscription,
   connect,
-  processSync,
-  queueupSync,
-  queueupSFEventLogs,
+  findOne,
+  findAll,
+  subscribe,
   createSOQL
 };
 
@@ -53,7 +53,7 @@ export async function processSFEventLogs<O, M>(
 
     const callback = message.event.type === "updated" ? onUpdate : onCreate;
 
-    await processSync<O, M>(
+    await findOne<O, M>(
       conn,
       sobjectName,
       message.sobject.Id,

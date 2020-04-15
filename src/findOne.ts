@@ -1,7 +1,7 @@
 import { Connection } from "jsforce";
 import { ModelMappedCallback, Fields } from "./types";
 
-export async function retrieve<O, M>(
+export async function find<O, M>(
   conn: Connection,
   sobjectName: string,
   sobjectId: string,
