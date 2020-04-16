@@ -65,65 +65,6 @@ async function povo() {
 }
 ```
 
-## Processing Messages
-
-This will retrieve the object from salesforce to map into an existing Heroku
-Connect table.
-
-```js
-import { processSFEventLogs } from "@luxuryescapes/povoconnect";
-import { credentials } from "./config";
-
-const fields = ["Id", "Name"];
-
-function mapper(sobject) {
-  return {
-    sfid: sobject.Id,
-    name: sobject.Name
-  }
-}
-
-async function onCreate(model) {
-  // insert
-}
-
-async function onUpdate(model) {
-  // update
-}
-
-async function onDelete(id) {
-  // delete
-}
-
-async function onUnDelete(id) {
-  // un-delete
-}
-
-async function povo() {
-  const conn = await connect(credentials);
-
-  const message = {
-    sobject: {
-      Id: "SA0000000000"
-    }
-  }
-
-  await processSFEventLogs(
-    conn,
-    "Opportunity",
-    [message],
-    mapper,
-    onCreate,
-    onUpdate,
-    onDelete,
-    onUnDelete,
-    fields
-  );
-}
-```
-
-Note: `fields` argument is optional, if ommited entire object will be retrieved.
-
 ## Retrieving All
 
 If you need to resync all your data.

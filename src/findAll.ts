@@ -3,7 +3,7 @@ import csv from "csv-parser";
 
 import { createSOQL } from "./soql";
 import { ListTimeOutError } from "./errors";
-import { Query, ModelMappedCallback } from "./types";
+import { Query } from "./types";
 
 function getFields(query?: Query): string[] {
   const idOnly = ["Id"];
@@ -48,9 +48,8 @@ export async function find<O, M>(
   sobjectName: string,
   timeout: number,
   mapper: (sobject: O) => M,
-  onReceive: ModelMappedCallback<M>,
   query?: Query
-): Promise<void> {
+): Promise<M[]> {
   conn.bulk.pollTimeout = timeout;
 
   const onTimeout = (): void => {
@@ -79,12 +78,7 @@ export async function find<O, M>(
       })
       .on("end", async () => {
         clearTimeout(to);
-
-        for (const sobject of sobjects) {
-          await onReceive(mapper(sobject));
-        }
-
-        resolve();
+        resolve(sobjects.map(mapper));
       })
       .on("error", reject);
   });

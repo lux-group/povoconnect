@@ -22,11 +22,7 @@ export interface Credentials {
   username: string;
 }
 
-export type ModelMappedCallback<M> = (model: M) => Promise<void>;
-
 export type MessageReceiveCallback = (message: Message) => Promise<void>;
-
-export type IdReceiveCallback = (id: string) => Promise<void>;
 
 export type Fields = string[];
 
