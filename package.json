@@ -1,13 +1,20 @@
 {
+  "name": "@luxuryescapes/povoconnect",
   "version": "0.0.1",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "repository": "git@github.com:brandsExclusive/povoconnect.git",
+  "license": "MIT",
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "test": "APP_ENV=spec mocha --exit -r ts-node/register \"./{src,test}/**/*.spec.ts\" && yarn run lint && yarn run build",
+    "test": "env $(cat .env) APP_ENV=spec mocha --exit -r ts-node/register \"./{src,test}/**/*.spec.ts\" && yarn run lint && yarn run build",
     "smoke": "ts-node smoke.ts",
     "lint": "eslint src test smoke.ts --ext .ts",
-    "lint-fix": "yarn run lint --fix"
+    "lint-fix": "yarn run lint --fix",
+    "prepare": "yarn run build",
+    "prepublishOnly": "yarn test && yarn run lint",
+    "preversion": "yarn run lint",
+    "postversion": "git push && git push --tags"
   },
   "dependencies": {
     "@types/jsforce": "^1.9.15",

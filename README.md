@@ -53,7 +53,7 @@ async function onReceive(message) {
   // do something here 
 }
 
-async function povo() {
+async function subscribeToOpportunityUpdates() {
   const conn = await connect(credentials);
 
   const subscription = {
@@ -61,7 +61,12 @@ async function povo() {
     replayId: null
   }
 
-  await subscribe(conn, subscription, timeout, onReceive);
+  await subscribe(
+    conn,
+    subscription,
+    timeout,
+    onReceive
+  );
 }
 ```
 
@@ -77,10 +82,6 @@ import { credentials } from "./config";
 
 const timeout = 60000;
 
-async function onReceive({ Id }) {
-  // do something here
-}
-
 function mapper(sobject) {
   return {
     sfid: sobject.Id,
@@ -88,27 +89,24 @@ function mapper(sobject) {
   }
 }
 
-async function povo() {
-  const conn = await connect(credentials);
-
-  await findAll(conn, "Opportunity", timeout, mapper, onReceive);
-}
-
-povo();
-```
-
-You can also specify a query object:
-
-```js
 const query = {
   fields: ["Id", "CreatedDate"],
   where: "foo = 'bar'",
   limit: 100
 }
 
-await findAll(conn, "Opportunity", timeout, mapper, onReceive, query);
-```
+async function findAllOpportunity() {
+  const conn = await connect(credentials);
 
+  const models = await findAll(
+    conn,
+    "Opportunity",
+    timeout,
+    mapper,
+    query
+  );
+}
+```
 
 ## Sync Object
 
@@ -127,20 +125,18 @@ function mapper(sobject) {
   }
 }
 
-async function onReceive(model) {
-  // do something here
-}
-
-async function povo() {
+async function findOpportunityById(sfid) {
   const conn = await connect(credentials);
   
-  await findOne(
+  const model = await findOne(
     conn,
     "Opportunity",
-    "SA0000000000",
+    sfid,
     mapper,
     onReceive,
     fields
   );
+
+  return model
 }
 ```
