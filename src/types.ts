@@ -27,3 +27,11 @@ export type ModelMappedCallback<M> = (model: M) => Promise<void>;
 export type MessageReceiveCallback = (message: Message) => Promise<void>;
 
 export type IdReceiveCallback = (id: string) => Promise<void>;
+
+export type Fields = string[];
+
+export interface Query {
+  where?: string;
+  limit?: number;
+  fields: Fields;
+}

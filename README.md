@@ -44,7 +44,7 @@ Note: store `message.data.replayId` of the latest processed message for use next
 time you run a job.
 
 ```js
-import { queueupSFEventLogs } from "@luxuryescapes/povoconnect";
+import { subscribe } from "@luxuryescapes/povoconnect";
 import { credentials } from "./config";
 
 const timeout = Infinity;
@@ -61,7 +61,7 @@ async function povo() {
     replayId: null
   }
 
-  await queueupSFEventLogs(conn, subscription, timeout, onReceive);
+  await subscribe(conn, subscription, timeout, onReceive);
 }
 ```
 
@@ -124,38 +124,57 @@ async function povo() {
 
 Note: `fields` argument is optional, if ommited entire object will be retrieved.
 
-## Retrieving All Object IDs
+## Retrieving All
 
-If you need to resync all your data because you want to sync a new field from
-Salesforce.
+If you need to resync all your data.
 
-list` return all ids for you object so you can create jobs to sync the data.
+`list` returns all ids for you object so you can create jobs to sync the data.
 
 ```js
-import { queueupSync } from "@luxuryescapes/povoconnect";
+import { findAll } from "@luxuryescapes/povoconnect";
 import { credentials } from "./config";
 
 const timeout = 60000;
 
-async function onReceive(id) {
+async function onReceive({ Id }) {
   // do something here
+}
+
+function mapper(sobject) {
+  return {
+    sfid: sobject.Id,
+    name: sobject.Name
+  }
 }
 
 async function povo() {
   const conn = await connect(credentials);
 
-  await queueupSync(conn, "Opportunity", timeout, onReceive);
+  await findAll(conn, "Opportunity", timeout, mapper, onReceive);
 }
 
 povo();
 ```
+
+You can also specify a query object:
+
+```js
+const query = {
+  fields: ["Id", "CreatedDate"],
+  where: "foo = 'bar'",
+  limit: 100
+}
+
+await findAll(conn, "Opportunity", timeout, mapper, onReceive, query);
+```
+
 
 ## Sync Object
 
 Retrieves the object to sync.
 
 ```js
-import { processSync } from "@luxuryescapes/povoconnect";
+import { findOne } from "@luxuryescapes/povoconnect";
 import { credentials } from "./config";
 
 const fields = ["Id", "Name"]
@@ -174,7 +193,7 @@ async function onReceive(model) {
 async function povo() {
   const conn = await connect(credentials);
   
-  await processSync(
+  await findOne(
     conn,
     "Opportunity",
     "SA0000000000",
