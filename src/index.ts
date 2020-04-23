@@ -1,15 +1,16 @@
-import { connect } from "./connection";
+import { connect, Credentials } from "./connection";
 import { find as findOne } from "./findOne";
 import { find as findAll } from "./findAll";
-import { subscribe } from "./streaming";
-import { createSOQL } from "./soql";
-
 import {
+  subscribe,
+  upsertTopic,
+  deleteTopic,
+  listTopics,
   MessageReceiveCallback,
-  Credentials,
   Message,
   Subscription
-} from "./types";
+} from "./streaming";
+import { createSOQL, parseQuery } from "./soql";
 
 export {
   MessageReceiveCallback,
@@ -20,5 +21,9 @@ export {
   findOne,
   findAll,
   subscribe,
-  createSOQL
+  createSOQL,
+  parseQuery,
+  upsertTopic,
+  deleteTopic,
+  listTopics
 };

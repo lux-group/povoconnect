@@ -1,4 +1,13 @@
-import { subscribe, findAll, findOne, Message, connect } from "./src";
+import {
+  subscribe,
+  findAll,
+  findOne,
+  Message,
+  connect,
+  upsertTopic,
+  deleteTopic,
+  listTopics
+} from "./src";
 import * as credentials from "./test/support/credentials";
 import { OpportunitySObject, OpportunityModel } from "./test/support/types";
 import { OpportunityMapper, OpportunityFields } from "./test/support/mapping";
@@ -35,8 +44,10 @@ async function povo(): Promise<void> {
     console.log("findOne: ", model);
   }
 
+  const where = "iswon = true";
+
   const query = {
-    where: "iswon = true",
+    where,
     limit: 1,
     fields: OpportunityFields
   };
@@ -50,6 +61,35 @@ async function povo(): Promise<void> {
   );
 
   console.log("findAll: ", models);
+
+  const topics = await listTopics(conn);
+
+  console.log(
+    "listTopics: ",
+    topics.map(topic => topic.Name)
+  );
+
+  const topic = await upsertTopic(conn, "Opportunity", "OpportunityUpdates", {
+    where
+  });
+
+  console.log("upsertTopic: ", topic.Name);
+
+  await upsertTopic(conn, "Opportunity", "ToDeleteTopic");
+
+  await deleteTopic(conn, "ToDeleteTopic");
+
+  const toDeleteTopics = await listTopics(conn);
+
+  const shouldBeDeletedTopic = toDeleteTopics.find(
+    topic => topic.Name === "ToDeleteTopic"
+  );
+
+  if (shouldBeDeletedTopic) {
+    throw new Error("Should have deleted topic");
+  }
+
+  console.log("deleteTopic: ", true);
 }
 
 const main = async function(): Promise<void> {
