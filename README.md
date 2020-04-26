@@ -6,22 +6,7 @@ A persistence agnostic replacement for Heroku Connect.
 npm install @luxuryescapes/povoconnect
 ```
 
-## Setup
-
-Create topic in the apex debug console:
-
-```
-PushTopic pushTopic = new PushTopic();
-pushTopic.Name = 'OpportunityUpdates';
-pushTopic.Query = 'SELECT Id FROM Opportunity';
-pushTopic.ApiVersion = 48.0;
-pushTopic.NotifyForOperationCreate = true;
-pushTopic.NotifyForOperationUpdate = true;
-pushTopic.NotifyForOperationUndelete = true;
-pushTopic.NotifyForOperationDelete = true;
-pushTopic.NotifyForFields = 'All';
-insert pushTopic;
-```
+## Credentials
 
 Create credentials for connection:
 
@@ -35,16 +20,28 @@ export const credentials = {
 }
 ```
 
-## Processing Events
+## Create Topic
 
-Subscribe to the topic and insert into existing `_sf_event_log` table if
-migrating from Heroku Connect or create a job in Redis.
+```js
+import { connect, createTopic } from "@luxuryescapes/povoconnect";
+import { credentials } from "./config";
+
+async function createTopic() {
+  const conn = await connect(credentials);
+
+  const topic = await upsertTopic(conn, "OpportunityUpdates")
+}
+```
+
+## Subscribe To Topic
+
+Subscribe to the topic to sync data in real time.
 
 Note: store `message.data.replayId` of the latest processed message for use next
 time you run a job.
 
 ```js
-import { subscribe } from "@luxuryescapes/povoconnect";
+import { connect, subscribe } from "@luxuryescapes/povoconnect";
 import { credentials } from "./config";
 
 const timeout = Infinity;
@@ -70,14 +67,45 @@ async function subscribeToOpportunityUpdates() {
 }
 ```
 
-## Retrieving All
+## Find
 
-If you need to resync all your data.
-
-`list` returns all ids for you object so you can create jobs to sync the data.
+Retrieves the object to sync.
 
 ```js
-import { findAll } from "@luxuryescapes/povoconnect";
+import { connect, findOne } from "@luxuryescapes/povoconnect";
+import { credentials } from "./config";
+
+const fields = ["Id", "Name"]
+
+function mapper(sobject) {
+  return {
+    sfid: sobject.Id,
+    name: sobject.Name
+  }
+}
+
+async function findOpportunityById(sfid) {
+  const conn = await connect(credentials);
+  
+  const model = await findOne(
+    conn,
+    "Opportunity",
+    sfid,
+    mapper,
+    onReceive,
+    fields
+  );
+
+  return model
+}
+```
+
+## Find All
+
+`findAll` returns all objects so you can make sure data is in sync.
+
+```js
+import { connect, findAll } from "@luxuryescapes/povoconnect";
 import { credentials } from "./config";
 
 const timeout = 60000;
@@ -105,38 +133,5 @@ async function findAllOpportunity() {
     mapper,
     query
   );
-}
-```
-
-## Sync Object
-
-Retrieves the object to sync.
-
-```js
-import { findOne } from "@luxuryescapes/povoconnect";
-import { credentials } from "./config";
-
-const fields = ["Id", "Name"]
-
-function mapper(sobject) {
-  return {
-    sfid: sobject.Id,
-    name: sobject.Name
-  }
-}
-
-async function findOpportunityById(sfid) {
-  const conn = await connect(credentials);
-  
-  const model = await findOne(
-    conn,
-    "Opportunity",
-    sfid,
-    mapper,
-    onReceive,
-    fields
-  );
-
-  return model
 }
 ```

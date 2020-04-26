@@ -1,5 +1,5 @@
 import { Connection } from "jsforce";
-import { Fields } from "./types";
+import { Fields } from "./soql";
 
 export async function find<O, M>(
   conn: Connection,
