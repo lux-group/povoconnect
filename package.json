@@ -1,12 +1,12 @@
 {
   "name": "@luxuryescapes/povoconnect",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "repository": "git@github.com:brandsExclusive/povoconnect.git",
   "license": "MIT",
   "scripts": {
-    "build": "rm -rf dist && tsc",
+    "build": "rm -rf lib && tsc",
     "test": "env $(cat .env) APP_ENV=spec mocha --exit -r ts-node/register \"./{src,test}/**/*.spec.ts\" && yarn run lint && yarn run build",
     "smoke": "ts-node smoke.ts",
     "lint": "eslint src test smoke.ts --ext .ts",
