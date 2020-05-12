@@ -23,7 +23,6 @@
   "dependencies": {
     "@types/jsforce": "^1.9.15",
     "@types/readable-stream": "^2.3.5",
-    "csv-parser": "^2.3.2",
     "jsforce": "^1.9.3"
   },
   "devDependencies": {

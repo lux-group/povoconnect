@@ -23,7 +23,7 @@ export const credentials = {
 ## Create Topic
 
 ```js
-import { connect, createTopic } from "@luxuryescapes/povoconnect";
+import { connect, upsertTopic } from "@luxuryescapes/povoconnect";
 import { credentials } from "./config";
 
 async function createTopic() {
@@ -108,7 +108,7 @@ async function findOpportunityById(sfid) {
 import { connect, findAll } from "@luxuryescapes/povoconnect";
 import { credentials } from "./config";
 
-const timeout = 60000;
+const maxFetch = 60000;
 
 function mapper(sobject) {
   return {
@@ -129,7 +129,7 @@ async function findAllOpportunity() {
   const models = await findAll(
     conn,
     "Opportunity",
-    timeout,
+    maxFetch,
     mapper,
     query
   );
