@@ -6,6 +6,9 @@ A persistence agnostic replacement for Heroku Connect.
 npm install @luxuryescapes/povoconnect
 ```
 
+Before using Povo Connect make some rough API request calculations and check that
+you will not exceed the [Salesforce API limits](https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_api.htm).
+
 ## Credentials
 
 Create credentials for connection:
@@ -102,7 +105,9 @@ async function findOpportunityById(sfid) {
 
 ## Find All
 
-`findAll` returns all objects so you can make sure data is in sync.
+When you make a schema change or you had an outage `findAll` will fetch all
+objects of a type so you can update your data. After this is done events should
+keep your data in sync.
 
 ```js
 import { connect, findAll } from "@luxuryescapes/povoconnect";
