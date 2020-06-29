@@ -1,3 +1,7 @@
+// run with:
+//
+//   env $(cat .env) yarn smoke
+
 import {
   subscribe,
   findAll,
@@ -6,7 +10,8 @@ import {
   connect,
   upsertTopic,
   deleteTopic,
-  listTopics
+  listTopics,
+  describe
 } from "./src";
 import * as credentials from "./test/support/credentials";
 import { OpportunitySObject, OpportunityModel } from "./test/support/types";
@@ -14,6 +19,10 @@ import { OpportunityMapper, OpportunityFields } from "./test/support/mapping";
 
 async function povo(): Promise<void> {
   const conn = await connect(credentials);
+
+  const meta = await describe(conn, "Opportunity");
+
+  console.log("describe:", meta.name);
 
   const messages: Message[] = [];
 

@@ -1,6 +1,7 @@
 import { connect, Credentials } from "./connection";
 import { find as findOne } from "./findOne";
 import { find as findAll } from "./findAll";
+import { describe } from "./describe";
 import {
   subscribe,
   upsertTopic,
@@ -25,5 +26,6 @@ export {
   parseQuery,
   upsertTopic,
   deleteTopic,
-  listTopics
+  listTopics,
+  describe
 };
