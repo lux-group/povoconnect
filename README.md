@@ -140,3 +140,18 @@ async function findAllOpportunity() {
   );
 }
 ```
+
+### Describe Object
+
+Describe the SO object for mapping:
+
+```js
+import { connect, describe } from "@luxuryescapes/povoconnect";
+import { credentials } from "./config";
+
+async function describeObject() {
+  const conn = await connect(credentials);
+
+  const meta = await describe(conn, "Opportunity");
+}
+```
