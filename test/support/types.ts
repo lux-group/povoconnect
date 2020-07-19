@@ -8,6 +8,6 @@ export interface OpportunitySObject {
 export interface OpportunityModel {
   sfid: string;
   name: string;
-  systemmodstamp: string;
-  createddate: string;
+  systemmodstamp: Date;
+  createddate: Date;
 }

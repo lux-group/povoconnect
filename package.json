@@ -22,15 +22,18 @@
   ],
   "dependencies": {
     "@types/jsforce": "^1.9.15",
+    "@types/node-fetch": "^2.5.0",
     "@types/readable-stream": "^2.3.5",
-    "jsforce": "^1.9.3"
+    "@types/xml2js": "^0.4.5",
+    "jsforce": "^1.9.3",
+    "node-fetch": "^2.6.0",
+    "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "@luxuryescapes/lib-factories": "^1.0.3",
     "@types/chai": "^4.2.0",
     "@types/micro": "^7.3.3",
     "@types/mocha": "^5.2.7",
-    "@types/node-fetch": "^2.5.0",
     "@typescript-eslint/eslint-plugin": "^2.1.0",
     "@typescript-eslint/parser": "^2.1.0",
     "chai": "^4.2.0",
