@@ -63,9 +63,9 @@ async function batchCompletion(
   jobId: string,
   batchId: string
 ): Promise<void> {
-  let batchStatus = await getBatchStatus(accessToken, baseUrl, jobId, batchId);
-
   const start = new Date().getTime();
+
+  let batchStatus = await getBatchStatus(accessToken, baseUrl, jobId, batchId);
 
   let ms = 1000;
 
@@ -126,7 +126,7 @@ async function createJob(
   };
 }
 
-async function creatBatch(
+async function createBatch(
   accessToken: string,
   baseUrl: string,
   jobId: string,
@@ -206,7 +206,7 @@ export async function find<O, M>(
 
   const job = await createJob(accessToken, baseUrl, sobjectName);
 
-  const batch = await creatBatch(accessToken, baseUrl, job.id, soql);
+  const batch = await createBatch(accessToken, baseUrl, job.id, soql);
 
   await batchCompletion(accessToken, baseUrl, job.id, batch.id);
 
