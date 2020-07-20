@@ -11,7 +11,7 @@ export function OpportunityMapper(o: OpportunitySObject): OpportunityModel {
   return {
     sfid: o.Id,
     name: o.Name,
-    systemmodstamp: o.SystemModstamp,
-    createddate: o.CreatedDate
+    systemmodstamp: new Date(o.SystemModstamp),
+    createddate: new Date(o.CreatedDate)
   };
 }
