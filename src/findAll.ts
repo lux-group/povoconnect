@@ -77,9 +77,11 @@ async function batchCompletion(
       throw new Error("timeout error");
     }
 
-    await timeout(1000);
+    await timeout(ms);
 
-    ms = ms + 1000;
+    if (ms < 5000) {
+      ms = ms + 1000;
+    }
 
     batchStatus = await getBatchStatus(accessToken, baseUrl, jobId, batchId);
   }
