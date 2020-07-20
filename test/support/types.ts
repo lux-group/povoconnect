@@ -1,8 +1,8 @@
 export interface OpportunitySObject {
   Id: string;
   Name: string;
-  SystemModstamp: string;
-  CreatedDate: string;
+  SystemModstamp: string | number;
+  CreatedDate: string | number;
 }
 
 export interface OpportunityModel {

@@ -20,39 +20,38 @@ import { OpportunityMapper, OpportunityFields } from "./test/support/mapping";
 async function povo(): Promise<void> {
   const conn = await connect(credentials);
 
-  console.log(conn)
-  // const meta = await describe(conn, "Opportunity");
+  const meta = await describe(conn, "Opportunity");
 
-  // console.log("describe:", meta.name);
+  console.log("describe:", meta.name);
 
-  // const messages: Message[] = [];
+  const messages: Message[] = [];
 
-  // const subscription = {
-  //   topic: "OpportunityUpdates",
-  //   replayId: null
-  // };
+  const subscription = {
+    topic: "OpportunityUpdates",
+    replayId: null
+  };
 
-  // const onReceiveMessage = async (message: Message): Promise<void> => {
-  //   messages.push(message);
-  // };
+  const onReceiveMessage = async (message: Message): Promise<void> => {
+    messages.push(message);
+  };
 
-  // await subscribe(conn, subscription, 10000, onReceiveMessage);
+  await subscribe(conn, subscription, 10000, onReceiveMessage);
 
-  // console.log("subscribe:", messages);
+  console.log("subscribe:", messages);
 
-  // const message = messages[0];
+  const message = messages[0];
 
-  // if (message) {
-  //   const model = await findOne<OpportunitySObject, OpportunityModel>(
-  //     conn,
-  //     "Opportunity",
-  //     message.sobject.Id,
-  //     OpportunityMapper,
-  //     OpportunityFields
-  //   );
+  if (message) {
+    const model = await findOne<OpportunitySObject, OpportunityModel>(
+      conn,
+      "Opportunity",
+      message.sobject.Id,
+      OpportunityMapper,
+      OpportunityFields
+    );
 
-  //   console.log("findOne: ", model);
-  // }
+    console.log("findOne: ", model);
+  }
 
   const where = "iswon = true";
 
@@ -72,34 +71,34 @@ async function povo(): Promise<void> {
 
   console.log("findAll: ", models);
 
-  // const topics = await listTopics(conn);
+  const topics = await listTopics(conn);
 
-  // console.log(
-  //   "listTopics: ",
-  //   topics.map(topic => topic.Name)
-  // );
+  console.log(
+    "listTopics: ",
+    topics.map(topic => topic.Name)
+  );
 
-  // const topic = await upsertTopic(conn, "Opportunity", "OpportunityUpdates", {
-  //   where
-  // });
+  const topic = await upsertTopic(conn, "Opportunity", "OpportunityUpdates", {
+    where
+  });
 
-  // console.log("upsertTopic: ", topic.Name);
+  console.log("upsertTopic: ", topic.Name);
 
-  // await upsertTopic(conn, "Opportunity", "ToDeleteTopic");
+  await upsertTopic(conn, "Opportunity", "ToDeleteTopic");
 
-  // await deleteTopic(conn, "ToDeleteTopic");
+  await deleteTopic(conn, "ToDeleteTopic");
 
-  // const toDeleteTopics = await listTopics(conn);
+  const toDeleteTopics = await listTopics(conn);
 
-  // const shouldBeDeletedTopic = toDeleteTopics.find(
-  //   topic => topic.Name === "ToDeleteTopic"
-  // );
+  const shouldBeDeletedTopic = toDeleteTopics.find(
+    topic => topic.Name === "ToDeleteTopic"
+  );
 
-  // if (shouldBeDeletedTopic) {
-  //   throw new Error("Should have deleted topic");
-  // }
+  if (shouldBeDeletedTopic) {
+    throw new Error("Should have deleted topic");
+  }
 
-  // console.log("deleteTopic: ", true);
+  console.log("deleteTopic: ", true);
 }
 
 const main = async function(): Promise<void> {

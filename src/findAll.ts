@@ -3,21 +3,93 @@ import xml2js from "xml2js";
 import fetch from "node-fetch";
 import { promisify } from "util";
 
+import timeout from "./timeout";
 import { createSOQL, parseQuery, Query } from "./soql";
 
 const parseXML = promisify(xml2js.parseString);
 
-export async function find<O, M>(
-  conn: Connection,
-  sobjectName: string,
-  maxFetch: number,
-  mapper: (sobject: O) => M,
-  query?: Query
-): Promise<M[]> {
-  const { fields, where, limit } = parseQuery(query);
+interface Job {
+  id: string;
+}
 
-  const soql = createSOQL(sobjectName, fields, where, limit);
+interface Batch {
+  id: string;
+}
 
+interface BatchStatus {
+  apexProcessingTime: number;
+  apiActiveProcessingTime: number;
+  createdDate: string;
+  id: string;
+  jobId: string;
+  numberRecordsFailed: number;
+  numberRecordsProcessed: number;
+  state: string;
+  stateMessage: string | null;
+  systemModstamp: string;
+  totalProcessingTime: number;
+}
+
+interface Result {
+  id: string;
+}
+
+interface JobXML {
+  jobInfo: {
+    id: string[];
+  };
+}
+
+async function getBatchStatus(
+  accessToken: string,
+  baseUrl: string,
+  jobId: string,
+  batchId: string
+): Promise<BatchStatus> {
+  const response = await fetch(`${baseUrl}/job/${jobId}/batch/${batchId}`, {
+    headers: {
+      "X-SFDC-Session": accessToken
+    }
+  });
+
+  const result = await response.json();
+
+  return result;
+}
+
+async function batchCompletion(
+  accessToken: string,
+  baseUrl: string,
+  jobId: string,
+  batchId: string
+): Promise<void> {
+  let batchStatus = await getBatchStatus(accessToken, baseUrl, jobId, batchId);
+
+  const start = new Date().getTime();
+
+  let ms = 1000;
+
+  while (batchStatus.state !== "Completed") {
+    const end = new Date().getTime();
+    const time = end - start;
+
+    if (time > 300000) {
+      throw new Error("timeout error");
+    }
+
+    await timeout(1000);
+
+    ms = ms + 1000;
+
+    batchStatus = await getBatchStatus(accessToken, baseUrl, jobId, batchId);
+  }
+}
+
+async function createJob(
+  accessToken: string,
+  baseUrl: string,
+  sobjectName: string
+): Promise<Job> {
   const obj = {
     jobInfo: {
       $: {
@@ -28,78 +100,129 @@ export async function find<O, M>(
       concurrencyMode: "Parallel",
       contentType: "JSON"
     }
-  }
+  };
 
   const builder = new xml2js.Builder();
-  const xml = builder.buildObject(obj);
 
-  const job = await fetch(`${conn.instanceUrl}/services/async/${conn.version}/job`, {
+  const body = builder.buildObject(obj);
+
+  const response = await fetch(`${baseUrl}/job`, {
     method: "POST",
-    body: xml,
+    body,
     headers: {
-      "X-SFDC-Session": conn.accessToken,
+      "X-SFDC-Session": accessToken,
       "Content-Type": "application/xml"
     }
   });
 
-  const responseBody = await job.text();
+  const xml = await response.text();
 
-  const responseXml = await parseXML(responseBody) as any;
+  const result = (await parseXML(xml)) as JobXML;
 
-  const jobId = responseXml['jobInfo']['id'][0]
+  return {
+    id: result["jobInfo"]["id"][0]
+  };
+}
 
-  const batchResponse = await fetch(`${conn.instanceUrl}/services/async/${conn.version}/job/${jobId}/batch`, {
+async function creatBatch(
+  accessToken: string,
+  baseUrl: string,
+  jobId: string,
+  soql: string
+): Promise<Batch> {
+  const response = await fetch(`${baseUrl}/job/${jobId}/batch`, {
     method: "POST",
     body: soql,
     headers: {
-      "X-SFDC-Session": conn.accessToken,
+      "X-SFDC-Session": accessToken,
       "Content-Type": "application/json"
     }
-  })
+  });
 
-  const batch = await batchResponse.json()
+  const result = await response.json();
 
-  const batchId = batch.id
+  return result;
+}
 
-  const statusResponse = await fetch(`${conn.instanceUrl}/services/async/${conn.version}/job/${jobId}/batch/${batchId}`, {
-    headers: {
-      "X-SFDC-Session": conn.accessToken
+async function getResult(
+  accessToken: string,
+  baseUrl: string,
+  jobId: string,
+  batchId: string
+): Promise<Result> {
+  const resultResponse = await fetch(
+    `${baseUrl}/job/${jobId}/batch/${batchId}/result`,
+    {
+      headers: {
+        "X-SFDC-Session": accessToken
+      }
     }
-  })
+  );
 
-  const status = await statusResponse.json()
+  const [resultId] = await resultResponse.json();
 
-  // switch(status) {
-  //   case "Completed":
-  //     break;
-  //   default:
-  // }
+  return {
+    id: resultId
+  };
+}
 
-  console.log(status)
-
-  const resultResponse = await fetch(`${conn.instanceUrl}/services/async/${conn.version}/job/${jobId}/batch/${batchId}/result`, {
-    headers: {
-      "X-SFDC-Session": conn.accessToken
+async function getSObjects<O>(
+  accessToken: string,
+  baseUrl: string,
+  jobId: string,
+  batchId: string,
+  resultId: string
+): Promise<O[]> {
+  const response = await fetch(
+    `${baseUrl}/job/${jobId}/batch/${batchId}/result/${resultId}`,
+    {
+      headers: {
+        "X-SFDC-Session": accessToken
+      }
     }
-  })
+  );
 
-  const [ resultId ] = await resultResponse.json()
+  const result = (await response.json()) as O[];
 
-  console.log(resultId)
+  return result;
+}
 
-  const resResponse = await fetch(`${conn.instanceUrl}/services/async/${conn.version}/job/${jobId}/batch/${batchId}/result/${resultId}`, {
-    headers: {
-      "X-SFDC-Session": conn.accessToken
-    }
-  })
+export async function find<O, M>(
+  conn: Connection,
+  sobjectName: string,
+  maxFetch: number,
+  mapper: (sobject: O) => M,
+  query?: Query
+): Promise<M[]> {
+  const { fields, where, limit } = parseQuery(query);
 
-  const foo = await resResponse.json() as O[]
+  const { instanceUrl, version, accessToken } = conn;
+
+  const soql = createSOQL(sobjectName, fields, where, limit);
+
+  const baseUrl = `${instanceUrl}/services/async/${version}`;
+
+  const job = await createJob(accessToken, baseUrl, sobjectName);
+
+  const batch = await creatBatch(accessToken, baseUrl, job.id, soql);
+
+  await batchCompletion(accessToken, baseUrl, job.id, batch.id);
+
+  const result = await getResult(accessToken, baseUrl, job.id, batch.id);
+
+  const sobjects = await getSObjects<O>(
+    conn.accessToken,
+    baseUrl,
+    job.id,
+    batch.id,
+    result.id
+  );
 
   const models: M[] = [];
 
-  for (const sobject of foo) {
+  for (const sobject of sobjects) {
     models.push(mapper(sobject));
   }
 
-  return models
+  return models;
 }
