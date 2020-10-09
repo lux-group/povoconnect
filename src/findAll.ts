@@ -73,7 +73,7 @@ async function batchCompletion(
     const end = new Date().getTime();
     const time = end - start;
 
-    if (time > 300000) {
+    if (time > 600000) {
       throw new Error("timeout error");
     }
 
